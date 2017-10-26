@@ -65,11 +65,28 @@ namespace ExamConsole
         }
 
         private void LoadPaper()
-        {
-            using (StreamReader r = new StreamReader("mb2-718.json"))
+        {            
+            var retry = true;
+
+            while (retry)
             {
-                var json = r.ReadToEnd();
-                Questions = JsonConvert.DeserializeObject<List<Question>>(json);
+                try
+                {
+                    var examName = PromptForExamName();
+
+                    using (StreamReader r = new StreamReader(examName))
+                    {
+                        retry = false;
+                        var json = r.ReadToEnd();
+                        Questions = JsonConvert.DeserializeObject<List<Question>>(json);
+                    }
+                }
+                catch (IOException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex.Message + "\n");
+                    Console.ResetColor();
+                }
             }
 
             QuestionCount = Questions.Count;
@@ -77,7 +94,7 @@ namespace ExamConsole
 
         private void SetQuestions()
         {
-            Console.WriteLine($"There are {QuestionCount} questions available. How many would you like to answer?");
+            Console.WriteLine($"\nThere are {QuestionCount} questions available. How many would you like to answer?");
             QuestionCount = Convert.ToInt32(Console.ReadLine());
             ScrambleQuestions();
             TruncateQuestions();
@@ -86,7 +103,7 @@ namespace ExamConsole
 
         private void ToggleShowAnswers()
         {
-            Console.WriteLine("Would you like answers to be highlighted during the practice exam? (y/n)");
+            Console.WriteLine("\nWould you like answers to be highlighted during the practice exam? (y/n)");
             var result = Console.ReadLine();
             ShowAnswers = result.ToLower() == "y";
         }
@@ -151,6 +168,19 @@ namespace ExamConsole
         private void TruncateQuestions()
         {
             Questions.RemoveRange(QuestionCount, Questions.Count - (QuestionCount));
+        }
+
+        private string PromptForExamName()
+        {
+            Console.WriteLine("Please enter the name of your exam .json file:");
+            var examName = Console.ReadLine();
+
+            if (!examName.EndsWith(".json"))
+            {
+                examName += ".json";
+            }
+
+            return examName;
         }
     }
 }
