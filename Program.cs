@@ -1,4 +1,3 @@
-﻿
 namespace ExamConsole
 {
     internal static class Program
@@ -7,7 +6,6 @@ namespace ExamConsole
         {
             var exam = new Exam();
             exam.Begin();
-
         }
     }
 }
